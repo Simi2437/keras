@@ -1,0 +1,10 @@
+opencv-python
+scipy
+matplotlib
+numpy
+tensorflow
+PyPi
+IPython
+tensorflow_datasets
+pydot
+graphviz
