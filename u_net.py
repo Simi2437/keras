@@ -1,12 +1,14 @@
 import os
 
-input_dir = "/home/stefan/Downloads/seg_mask_keras/Images_png/"
+#input_dir = "/home/stefan/Downloads/seg_mask_keras/Images_png_resized/"
+input_dir = "/home/stefan/Downloads/seg_mask_keras/aug/img/"
 #input_dir = "images/"
 #target_dir = "annotations/trimaps/"
-target_dir = "/home/stefan/Downloads/seg_mask_keras/Category_ids_greyscale/"
-img_size = (256, 256)
+#target_dir = "/home/stefan/Downloads/seg_mask_keras/Category_ids_greyscale_resized/"
+target_dir = "/home/stefan/Downloads/seg_mask_keras/aug/mask_rescaled/"
+img_size = (480, 304)
 num_classes = 3
-batch_size = 14
+batch_size = 6
 
 input_img_paths = sorted(
     [
@@ -43,7 +45,7 @@ display(Image(filename=input_img_paths[9]))
 # Display auto-contrast version of corresponding target (per-pixel categories)
 img = PIL.ImageOps.autocontrast(load_img(target_img_paths[9]))
 display(img)
-
+img.show()
 #-----------------------------------------------------------------------------------------------------------------------
 
 from tensorflow import keras
@@ -180,9 +182,13 @@ val_gen = OxfordPets(batch_size, img_size, val_input_img_paths, val_target_img_p
 model.compile(optimizer="rmsprop", loss="sparse_categorical_crossentropy")
 
 callbacks = [
+    keras.callbacks.ModelCheckpoint("/home/stefan/Downloads/seg_mask_keras/saved_models/", save_best_only=True)
+]
+"""
+callbacks = [
     keras.callbacks.ModelCheckpoint("oxford_segmentation.h5", save_best_only=True)
 ]
-
+"""
 # Train the model, doing validation at the end of each epoch.
 epochs = 15
 model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
@@ -202,9 +208,11 @@ def display_mask(i):
     mask = np.expand_dims(mask, axis=-1)
     img = PIL.ImageOps.autocontrast(keras.preprocessing.image.array_to_img(mask))
     display(img)
+    img.show()
 
 
 # Display results for validation image #10
+
 i = 10
 
 # Display input image
@@ -213,11 +221,50 @@ display(Image(filename=val_input_img_paths[i]))
 # Display ground-truth target mask
 img = PIL.ImageOps.autocontrast(load_img(val_target_img_paths[i]))
 display(img)
+img.show()
 
 # Display mask predicted by our model
 display_mask(i)  # Note that the model only sees inputs at 150x150.
 
 
+i = 9
+
+# Display input image
+display(Image(filename=val_input_img_paths[i]))
+
+# Display ground-truth target mask
+img = PIL.ImageOps.autocontrast(load_img(val_target_img_paths[i]))
+display(img)
+img.show()
+
+# Display mask predicted by our model
+display_mask(i)  # Note that the model only sees inputs at 150x150.
+
+i = 8
+
+# Display input image
+display(Image(filename=val_input_img_paths[i]))
+
+# Display ground-truth target mask
+img = PIL.ImageOps.autocontrast(load_img(val_target_img_paths[i]))
+display(img)
+img.show()
+
+# Display mask predicted by our model
+display_mask(i)  # Note that the model only sees inputs at 150x150.
+
+i = 7
+
+# Display input image
+display(Image(filename=val_input_img_paths[i]))
+
+# Display ground-truth target mask
+img = PIL.ImageOps.autocontrast(load_img(val_target_img_paths[i]))
+display(img)
+img.show()
+
+# Display mask predicted by our model
+display_mask(i)  # Note that the model only sees inputs at 150x150.
 #-----------------------------------------------------------------------------------------------------------------------
 
 

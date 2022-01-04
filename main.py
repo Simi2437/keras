@@ -12,10 +12,12 @@ from tensorflow.keras import layers
 IMAGE_SIZE = 256
 BATCH_SIZE = 12
 NUM_CLASSES = 20
-DATA_DIR = "/home/stefan/Downloads/seg_mask_keras/"
-NUM_TRAIN_IMAGES = 100
-NUM_VAL_IMAGES = 50
+#DATA_DIR = "/home/stefan/Downloads/seg_mask_keras/"
 
+DATA_DIR = "/home/stefan/Downloads/seg_mask_keras/aug/"
+NUM_TRAIN_IMAGES = 700
+NUM_VAL_IMAGES = 50
+"""
 train_images = sorted(glob(os.path.join(DATA_DIR, "Images/*")))[:NUM_TRAIN_IMAGES]
 train_masks = sorted(glob(os.path.join(DATA_DIR, "Category_ids_greyscale/*")))[:NUM_TRAIN_IMAGES]
 val_images = sorted(glob(os.path.join(DATA_DIR, "Images/*")))[
@@ -24,7 +26,15 @@ val_images = sorted(glob(os.path.join(DATA_DIR, "Images/*")))[
 val_masks = sorted(glob(os.path.join(DATA_DIR, "Category_ids_greyscale/*")))[
     NUM_TRAIN_IMAGES : NUM_VAL_IMAGES + NUM_TRAIN_IMAGES
 ]
-
+"""
+train_images = sorted(glob(os.path.join(DATA_DIR, "img/*")))[:NUM_TRAIN_IMAGES]
+train_masks = sorted(glob(os.path.join(DATA_DIR, "mask_rescaled/*")))[:NUM_TRAIN_IMAGES]
+val_images = sorted(glob(os.path.join(DATA_DIR, "img/*")))[
+    NUM_TRAIN_IMAGES : NUM_VAL_IMAGES + NUM_TRAIN_IMAGES
+]
+val_masks = sorted(glob(os.path.join(DATA_DIR, "mask_rescaled/*")))[
+    NUM_TRAIN_IMAGES : NUM_VAL_IMAGES + NUM_TRAIN_IMAGES
+]
 
 def read_image(image_path, mask=False):
     image = tf.io.read_file(image_path)
@@ -33,7 +43,7 @@ def read_image(image_path, mask=False):
         image.set_shape([None, None, 1])
         image = tf.image.resize(images=image, size=[IMAGE_SIZE, IMAGE_SIZE])
     else:
-        image = tf.image.decode_bmp(image, channels=3)
+        image = tf.image.decode_png(image, channels=3)
         image.set_shape([None, None, 3])
         image = tf.image.resize(images=image, size=[IMAGE_SIZE, IMAGE_SIZE])
         image = image / 127.5 - 1
@@ -132,7 +142,7 @@ model.compile(
     metrics=["accuracy"],
 )
 
-history = model.fit(train_dataset, validation_data=val_dataset, epochs=2)
+history = model.fit(train_dataset, validation_data=val_dataset, epochs=15)
 
 plt.plot(history.history["loss"])
 plt.title("Training Loss")

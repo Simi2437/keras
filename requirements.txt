@@ -8,3 +8,4 @@ IPython
 tensorflow_datasets
 pydot
 graphviz
+skimage
