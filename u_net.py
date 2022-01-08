@@ -6,9 +6,9 @@ input_dir = "/home/stefan/Downloads/seg_mask_keras/aug/img/"
 #target_dir = "annotations/trimaps/"
 #target_dir = "/home/stefan/Downloads/seg_mask_keras/Category_ids_greyscale_resized/"
 target_dir = "/home/stefan/Downloads/seg_mask_keras/aug/mask_rescaled/"
-img_size = (480, 304)
+img_size = (304, 480)
 num_classes = 3
-batch_size = 6
+batch_size = 12
 
 input_img_paths = sorted(
     [
@@ -32,6 +32,14 @@ for input_path, target_path in zip(input_img_paths[:2], target_img_paths[:2]):
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+import tensorflow as tf
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+
+from tensorflow.python.client import device_lib
+def get_available_devices():
+    local_device_protos = device_lib.list_local_devices()
+    return [x.name for x in local_device_protos]
+print(get_available_devices())
 
 from IPython.display import Image, display
 from tensorflow.keras.preprocessing.image import load_img
@@ -180,9 +188,9 @@ val_gen = OxfordPets(batch_size, img_size, val_input_img_paths, val_target_img_p
 # We use the "sparse" version of categorical_crossentropy
 # because our target data is integers.
 model.compile(optimizer="rmsprop", loss="sparse_categorical_crossentropy")
-
+checkpoint_path = "/home/stefan/Downloads/seg_mask_keras/saved_models/"
 callbacks = [
-    keras.callbacks.ModelCheckpoint("/home/stefan/Downloads/seg_mask_keras/saved_models/", save_best_only=True)
+    keras.callbacks.ModelCheckpoint(checkpoint_path, save_best_only=True)
 ]
 """
 callbacks = [
@@ -190,10 +198,10 @@ callbacks = [
 ]
 """
 # Train the model, doing validation at the end of each epoch.
-epochs = 15
+epochs = 2
 model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
 
-
+# model.load_weights(checkpoint_path)
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Generate predictions for all images in the validation set

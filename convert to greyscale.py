@@ -3,12 +3,14 @@ import numpy as np
 import cv2
 import glob
 
+dst_img_width=480
+dst_img_height=304
 
 image_list = []
 for filename in glob.glob('/home/stefan/Downloads/seg_mask_keras/aug/mask/*.png'):
     im=cv2.imread(filename)
     print( im.shape)
-    img_dst=np.zeros(shape=[256,256,1],dtype=np.uint8)
+    img_dst=np.zeros(shape=[dst_img_height,dst_img_width,1],dtype=np.uint8)
     #img=cv2.createMat(im)
 
     #cv2.cvtColor(im,cv2.COLOR_BGR2GRAY,img_dst)
