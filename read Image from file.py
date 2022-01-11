@@ -18,7 +18,8 @@ from PyQt5.QtWidgets import QLineEdit, QApplication, QPushButton, QLabel, QWidge
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtGui import QMovie, QPixmap, QFont
 import cv2
-
+import timeit
+from numba import jit, cuda
 
 class OxfordPets(keras.utils.Sequence):
     """Helper to iterate over the data (as Numpy arrays)."""
@@ -34,21 +35,22 @@ class OxfordPets(keras.utils.Sequence):
     def __getitem__(self, idx):
         """Returns tuple (input, target) correspond to batch #idx."""
         x = np.zeros((self.batch_size,) + self.img_size + (3,), dtype="float32")
-        img = load_img(self.input_img_paths, target_size=self.img_size)
+        img = PIL.ImageOps.autocontrast(keras.preprocessing.image.array_to_img(self.input_img_paths))
         x[0] = img
         y = np.zeros((self.batch_size,) + self.img_size + (1,), dtype="uint8")
         return x, y
 
-
 class window(QWidget):
-    def resizeImages(self, img_path):
+
+    def resizeImages(self, im):
         dst_img_width = 480
         dst_img_height = 304
         # read the origin image
-        im = cv2.imread(img_path)
-        # im=im+10
+         #this one shouldn't be here becaus we start with the image in the ram where should we put it?
+        # im=im+10 you mean we input the data from ram yes
         # cv2.imshow("src",im)
-
+        #src_gpu=cv2.cuda_GpuMat()
+        #src_gpu.upload(im)
         print(im.shape)
         self.img_dst = np.zeros(shape=[dst_img_height, dst_img_width, 3], dtype=np.uint8)
         # img=cv2.createMat(im)
@@ -63,7 +65,7 @@ class window(QWidget):
         # cv2.waitKey(10000)
         # save the resized image to newpath
 
-     # loading orignal images
+    # loading orignal images
     def clickedInput(self):
 
         # self.input_dir = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
@@ -80,7 +82,6 @@ class window(QWidget):
         self.clickedSetconfig()
         print('file: ', self.input_dir)
 
-    # loading saved model from checkpoint_path
     def clickedLoadModel(self):
         # Loads the weights
         # self.checkpoint_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
@@ -159,13 +160,23 @@ class window(QWidget):
     def predict(self):
         # Generate predictions for all images in the validation set
         # resize and convert to png file the original image
-        self.resizeImages(self.input_img_paths[self.index])
+        im = cv2.imread(self.input_img_paths[0])
+        print("start")
+        for i in range(10):
+            # self.resizeImages(self.input_img_paths[self.index])
 
-        # predict the image
-        self.val_gen = OxfordPets(1, self.img_size, self.newpath)
-        self.val_preds = self.model.predict(self.val_gen)
-        self.display_mask(0)  # Note that the model only sees inputs at 150x150.
-        self.index = self.index + 1
+            self.resizeImages(im)
+            # predict the image
+            self.val_gen = OxfordPets(1, self.img_size, self.img_dst) # img_dst is the resized org image
+            start = timeit.default_timer()
+            self.val_preds = self.model.predict(self.val_gen)
+            print("time:",timeit.default_timer() - start)
+            # self.display_mask(0)  # Note that the model only sees inputs at 150x150.
+            # self.index = self.index + 1
+        print("end")
+
+        end = timeit.default_timer()
+        # print("10 images prediction takes ", end-start,"s")
 
     def display_mask(self, i):
         """Quick utility to display a model's prediction."""
@@ -183,7 +194,6 @@ class window(QWidget):
         dst = cv2.addWeighted(img1, 1, masked, 0.3, 0)
 
         img = PIL.ImageOps.autocontrast(keras.preprocessing.image.array_to_img(dst))
-        print("img1: ", img1)
         display(img)
         img.show()
 
@@ -243,27 +253,6 @@ class window(QWidget):
         # Define the model
         model = keras.Model(inputs, outputs)
         return model
-    # def validation(self):
-    #   # Display results for validation image #10
-    #   i = 10
-
-    #   # Display mask predicted by our model
-
-    #   i = 9
-
-    #   # Display mask predicted by our model
-    #   self.display_mask(i)  # Note that the model only sees inputs at 150x150.
-
-    #   i = 8
-
-    #   # Display mask predicted by our model
-    #   self.display_mask(i)  # Note that the model only sees inputs at 150x150.
-
-    #   i = 7
-
-    #   # Display input image
-    #   display(Image(filename=self.val_input_img_paths[i]))
-
 
 def main():
     app = QApplication([])
@@ -272,50 +261,8 @@ def main():
     ex.show()
     exit(app.exec_())
 
-
 if __name__ == '__main__':
     main()
-# input_dir = "/home/stefan/Downloads/seg_mask_keras/Images_png_resized/"
-
-# input_dir = "images/"
-# target_dir = "annotations/trimaps/"
-# target_dir = "/home/stefan/Downloads/seg_mask_keras/Category_ids_greyscale_resized/"
-
-
-# for input_path, target_path in zip(input_img_paths[:2], target_img_paths[:2]):
-#     print(input_path, "|", target_path)
-
-
-# -----------------------------------------------------------------------------------------------------------------------
-
-
-# from PIL import Image
-
-# filename= input_img_paths[9]
-# # Display input image #7
-# display(Image(filename=input_img_paths[9]))
-# # Display auto-contrast version of corresponding target (per-pixel categories)
-# img = PIL.ImageOps.autocontrast(load_img(target_img_paths[9]))
-# display(img)
-# img.show()
-# -----------------------------------------------------------------------------------------------------------------------
-
-# -----------------------------------------------------------------------------------------------------------------------
-
-
-"""
-callbacks = [
-    keras.callbacks.ModelCheckpoint("oxford_segmentation.h5", save_best_only=True)
-]
-"""
-
-# model.load_weights(checkpoint_path)
-# -----------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
 
 
 

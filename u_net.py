@@ -198,7 +198,7 @@ callbacks = [
 ]
 """
 # Train the model, doing validation at the end of each epoch.
-epochs = 2
+epochs = 30
 model.fit(train_gen, epochs=epochs, validation_data=val_gen, callbacks=callbacks)
 
 # model.load_weights(checkpoint_path)
