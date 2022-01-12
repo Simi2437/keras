@@ -192,33 +192,37 @@ class window(QWidget):
 
             #self.resizeImages(im)
             # predict the image
-            self.val_gen = OxfordPets(1, self.img_size, self.img_dst) # img_dst is the resized org image
+            # self.val_gen = OxfordPets(1, self.img_size, self.img_dst) # img_dst is the resized org image
             start = timeit.default_timer()
-            self.val_preds = self.model.predict(self.val_gen)#this funcion need 2.6s
-            #self.val_preds = self.model.__call__(x)
-            print(self.val_preds)
-            print("time:",timeit.default_timer() - start)
+            self.val_preds1 = self.model.__call__(x)
+
+            print("time1:",timeit.default_timer() - start)
+            start = timeit.default_timer()
+            self.val_preds = self.model.predict(x)  # this funcion need 2.6s
+            #print(self.val_preds)
+            print("time2:",timeit.default_timer() - start)
             # self.display_mask(0)  # Note that the model only sees inputs at 150x150.
             # self.index = self.index + 1
         mask = np.argmax(self.val_preds[0], axis=-1)
+        self.display_mask(self.val_preds[0])
+        self.display_mask(self.val_preds1[0])
         mask = np.expand_dims(mask , axis=-1)
         imgmask = PIL.ImageOps.autocontrast(keras.preprocessing.image.array_to_img(mask))
         #display(imgmask)
         #imgmask.show()
-        self.display_mask(0)
         print("end")
 
         end = timeit.default_timer()
         # print("10 images prediction takes ", end-start,"s")
 
-    def display_mask(self, i):
+    def display_mask(self, val_preds):
         """Quick utility to display a model's prediction."""
-        mask = np.argmax(self.val_preds[i], axis=-1)
+        mask = np.argmax(val_preds, axis=-1)
         mask = np.expand_dims(mask, axis=-1)
         mask_g = np.array(mask * 255, dtype=np.uint8)
-        img1 = cv2.imread(self.input_img_paths[i])
-        cv2.imshow("im1",img1)
-        cv2.waitKey(1000)
+        img1 = cv2.imread(self.input_img_paths[0])
+        # cv2.imshow("im1",img1)
+        # cv2.waitKey(1000)
         img1 = cv2.resize(img1 , dsize=(480,304))
         masked = cv2.bitwise_and(img1, img1, mask=mask_g)
         hi = len(mask)

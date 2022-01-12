@@ -156,6 +156,13 @@ def get_model(img_size, num_classes):
 
 # Free up RAM in case the model definition cells were run multiple times
 keras.backend.clear_session()
+InUse:                         8790272
+MaxInUse:                     10189056
+NumAllocs:                         242
+MaxAllocSize:                  2359296
+Reserved:                            0
+PeakReserved:                        0
+LargestFreeBlock:                    0
 
 # Build model
 model = get_model(img_size, num_classes)
