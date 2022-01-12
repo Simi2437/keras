@@ -94,14 +94,14 @@ class window(QWidget):
 
     def clickedSetconfig(self):
         # Build model
-        self.model = self.get_model(self.img_size, self.num_classes)
-        self.model.summary()
+        # self.model = self.get_model(self.img_size, self.num_classes)
+        # self.model.summary()
         self.index = 0
 
         # Configure the model for training.
         # We use the "sparse" version of categorical_crossentropy
         # because our target data is integers.
-        self.model.compile(optimizer="rmsprop", loss="sparse_categorical_crossentropy")
+        # self.model.compile(optimizer="rmsprop", loss="sparse_categorical_crossentropy")
         self.checkpoint_path = "/home/stefan/Downloads/seg_mask_keras/saved_models/"
         self.callbacks = [
             keras.callbacks.ModelCheckpoint(self.checkpoint_path, save_best_only=True)
@@ -198,7 +198,7 @@ class window(QWidget):
 
             print("time1:",timeit.default_timer() - start)
             start = timeit.default_timer()
-            self.val_preds = self.model.predict(x)  # this funcion need 2.6s
+            self.val_preds = self.model(x, training=False)  # this funcion need 2.6s
             #print(self.val_preds)
             print("time2:",timeit.default_timer() - start)
             # self.display_mask(0)  # Note that the model only sees inputs at 150x150.
